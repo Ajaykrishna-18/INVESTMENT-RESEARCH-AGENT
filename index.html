@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AuraInvest | AI Investment Research Agent</title>
+  
+  <!-- Font and Icon Assets -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="app-header">
+    <div class="header-logo">
+      <i class="fa-solid fa-chart-line logo-icon"></i>
+      <span class="logo-text">AURA<span class="logo-accent">INVEST</span></span>
+    </div>
+    
+    <div class="search-container">
+      <div class="search-wrapper">
+        <i class="fa-solid fa-search search-icon"></i>
+        <input type="text" id="ticker-input" placeholder="Enter Stock Ticker (e.g. AAPL, MSFT, TSLA)" autocomplete="off">
+        <button id="analyze-btn">
+          <span>Analyze</span>
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <button id="download-report-btn" class="action-btn" disabled>
+        <i class="fa-solid fa-file-pdf"></i> Export Report
+      </button>
+    </div>
+  </header>
+
+  <!-- Welcome / Intro screen -->
+  <main class="welcome-screen" id="welcome-screen">
+    <div class="welcome-card">
+      <i class="fa-solid fa-shield-halved welcome-icon"></i>
+      <h1>Intelligent Investment Research</h1>
+      <p>Automate deep financial metrics extraction, public news sentiment evaluation, technical trend modeling, and risk profiling for any stock ticker instantly.</p>
+      <div class="sample-tags">
+        <span>Try searching:</span>
+        <button class="sample-tag" data-ticker="AAPL">AAPL</button>
+        <button class="sample-tag" data-ticker="MSFT">MSFT</button>
+        <button class="sample-tag" data-ticker="TSLA">TSLA</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Main Analysis Dashboard Layout -->
+  <main class="dashboard-layout hidden" id="dashboard-layout">
+    
+    <!-- Left Area: Core Analysis Metrics -->
+    <section class="analysis-section">
+      
+      <!-- Row 1: Stock Meta & Recommendation Card -->
+      <div class="dashboard-row summary-row">
+        
+        <!-- Stock Details Meta Card -->
+        <div class="glass-card meta-card">
+          <div class="meta-header">
+            <div>
+              <h2 id="stock-name">Apple Inc.</h2>
+              <p class="ticker-badge" id="stock-symbol">AAPL</p>
+            </div>
+            <div class="price-info">
+              <span class="price-value" id="stock-price">$0.00</span>
+              <span class="price-currency" id="stock-currency">USD</span>
+            </div>
+          </div>
+          <div class="meta-body">
+            <div class="meta-item">
+              <span class="item-label">Sector</span>
+              <span class="item-value" id="stock-sector">Technology</span>
+            </div>
+            <div class="meta-item">
+              <span class="item-label">Industry</span>
+              <span class="item-value" id="stock-industry">Consumer Electronics</span>
+            </div>
+            <div class="meta-item">
+              <span class="item-label">Market Capitalization</span>
+              <span class="item-value" id="stock-marketcap">N/A</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weighted Recommendation Output Card -->
+        <div class="glass-card recommendation-card">
+          <h3>Investment Recommendation</h3>
+          <div class="rec-grid">
+            <div class="rec-score-wrapper">
+              <div class="circular-progress">
+                <span class="progress-value" id="rec-score">00</span>
+                <span class="progress-max">/100</span>
+              </div>
+              <span class="score-label">Decision Score</span>
+            </div>
+            <div class="rec-details">
+              <div class="badge-wrapper">
+                <span class="rec-badge" id="rec-rating">HOLD</span>
+              </div>
+              <div class="confidence-wrapper">
+                <span class="confidence-label">Confidence: <span id="rec-confidence">0%</span></span>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="rec-confidence-fill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="rec-bullets-container">
+            <h4>Key Decision Drivers:</h4>
+            <ul class="rec-bullets" id="rec-bullets">
+              <li>Pending evaluation calculations...</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Row 2: Analysis Details Tabs & Charts -->
+      <div class="glass-card details-card">
+        
+        <!-- Tabs Header Navigation -->
+        <div class="tabs-header">
+          <button class="tab-btn active" data-tab="fundamentals-tab">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Fundamentals
+          </button>
+          <button class="tab-btn" data-tab="technicals-tab">
+            <i class="fa-solid fa-chart-area"></i> Technical Trends
+          </button>
+          <button class="tab-btn" data-tab="sentiment-tab">
+            <i class="fa-solid fa-face-smile"></i> News Sentiment
+          </button>
+          <button class="tab-btn" data-tab="risk-tab">
+            <i class="fa-solid fa-triangle-exclamation"></i> Risk Profile
+          </button>
+        </div>
+
+        <!-- Tabs Content Body -->
+        <div class="tabs-content">
+          
+          <!-- Tab 1: Fundamentals -->
+          <div class="tab-panel active" id="fundamentals-tab">
+            <div class="fundamentals-grid">
+              <div class="table-container">
+                <table class="metrics-table">
+                  <thead>
+                    <tr>
+                      <th>Financial Metric</th>
+                      <th>Value</th>
+                      <th>Threshold / Benchmark</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Trailing P/E Ratio</td>
+                      <td class="metric-val" id="val-pe">N/A</td>
+                      <td>Value Indicator: &lt; 15 (Attractive), &gt; 25 (High)</td>
+                    </tr>
+                    <tr>
+                      <td>Forward P/E Ratio</td>
+                      <td class="metric-val" id="val-forwardpe">N/A</td>
+                      <td>Indicates upcoming price-to-earnings growth</td>
+                    </tr>
+                    <tr>
+                      <td>Earnings Per Share (EPS)</td>
+                      <td class="metric-val" id="val-eps">N/A</td>
+                      <td>Net profit allocated per outstanding share</td>
+                    </tr>
+                    <tr>
+                      <td>Return on Equity (ROE)</td>
+                      <td class="metric-val" id="val-roe">N/A</td>
+                      <td>Capital Efficiency: &gt; 15% is strong</td>
+                    </tr>
+                    <tr>
+                      <td>Net Profit Margin</td>
+                      <td class="metric-val" id="val-margin">N/A</td>
+                      <td>Operating Strength: &gt; 10% is healthy</td>
+                    </tr>
+                    <tr>
+                      <td>Debt-to-Equity Ratio</td>
+                      <td class="metric-val" id="val-de">N/A</td>
+                      <td>Solvency / Leverage: &lt; 100% is safe</td>
+                    </tr>
+                    <tr>
+                      <td>Revenue Growth (YoY)</td>
+                      <td class="metric-val" id="val-revgrowth">N/A</td>
+                      <td>Top-Line Expansion: Positive YoY is expected</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="metrics-panel">
+                <div class="valuation-badge-card">
+                  <span class="val-label">Fundamental Valuation Flag</span>
+                  <div class="val-badge" id="val-label">Evaluation pending...</div>
+                </div>
+                <div class="bullets-card">
+                  <h4>Fundamental Drivers:</h4>
+                  <ul class="bullets-list" id="fundamental-rationales">
+                    <li>Analyze ticker to view financial observations.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Technical Trends -->
+          <div class="tab-panel" id="technicals-tab">
+            <div class="technicals-grid">
+              <div class="chart-container">
+                <canvas id="price-chart"></canvas>
+              </div>
+              <div class="tech-stats">
+                <div class="tech-header">
+                  <span class="tech-label">Trend Momentum</span>
+                  <div class="trend-badge" id="tech-trend-badge">Neutral</div>
+                </div>
+                
+                <div class="tech-stats-grid">
+                  <div class="tech-stat-card">
+                    <span class="stat-name">RSI (14-day)</span>
+                    <span class="stat-val" id="tech-rsi">00</span>
+                    <span class="stat-desc">Oversold &lt; 30 | Overbought &gt; 70</span>
+                  </div>
+                  <div class="tech-stat-card">
+                    <span class="stat-name">MACD Histogram</span>
+                    <span class="stat-val" id="tech-macd">0.0000</span>
+                    <span class="stat-desc">Positive is Bullish | Negative is Bearish</span>
+                  </div>
+                  <div class="tech-stat-card">
+                    <span class="stat-name">SMA (20-day)</span>
+                    <span class="stat-val" id="tech-sma20">$0.00</span>
+                    <span class="stat-desc">Short-term price average support</span>
+                  </div>
+                  <div class="tech-stat-card">
+                    <span class="stat-name">SMA (50-day)</span>
+                    <span class="stat-val" id="tech-sma50">$0.00</span>
+                    <span class="stat-desc">Medium-term trend support</span>
+                  </div>
+                </div>
+
+                <div class="tech-bullets-card">
+                  <h4>Trend Observations:</h4>
+                  <ul class="bullets-list" id="tech-signals">
+                    <li>Run search to generate momentum insights.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 3: News Sentiment -->
+          <div class="tab-panel" id="sentiment-tab">
+            <div class="sentiment-grid">
+              <div class="sentiment-overview">
+                <div class="sentiment-score-box">
+                  <span class="box-score" id="sentiment-score">50</span>
+                  <span class="box-lbl">Sentiment Score</span>
+                </div>
+                <div class="sentiment-indicator">
+                  <span class="ind-lbl">Overall Mood</span>
+                  <div class="sent-badge" id="sentiment-label">Neutral</div>
+                </div>
+                <div class="sentiment-counts">
+                  <div class="count-item pos">
+                    <span class="count-lbl">Positive Terms</span>
+                    <span class="count-num" id="sentiment-pos-count">0</span>
+                  </div>
+                  <div class="count-item neg">
+                    <span class="count-lbl">Negative Terms</span>
+                    <span class="count-num" id="sentiment-neg-count">0</span>
+                  </div>
+                </div>
+                <p class="sent-details" id="sentiment-details">No headlines analyzed.</p>
+              </div>
+              <div class="sentiment-headlines">
+                <h4>Recent News Headlines Sentiment:</h4>
+                <div class="headlines-list" id="sentiment-headlines-list">
+                  <!-- Dynamic headlines -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 4: Risk Profile -->
+          <div class="tab-panel" id="risk-tab">
+            <div class="risk-grid">
+              <div class="risk-overview">
+                <div class="risk-score-box">
+                  <span class="risk-box-score" id="risk-score">00</span>
+                  <span class="risk-box-lbl">Risk Score</span>
+                </div>
+                <div class="risk-indicator">
+                  <span class="risk-ind-lbl">Overall Volatility Risk</span>
+                  <div class="risk-badge" id="risk-label">Medium Risk</div>
+                </div>
+              </div>
+              <div class="risk-details-panel">
+                <div class="risk-breakdown-row">
+                  <div class="breakdown-card">
+                    <span class="b-label">Beta (Market Correlation)</span>
+                    <span class="b-value" id="risk-beta">N/A</span>
+                    <span class="b-badge" id="risk-beta-badge">Moderate</span>
+                  </div>
+                  <div class="breakdown-card">
+                    <span class="b-label">Debt-to-Equity Ratio</span>
+                    <span class="b-value" id="risk-de">N/A</span>
+                    <span class="b-badge" id="risk-de-badge">Moderate</span>
+                  </div>
+                </div>
+                <div class="risk-bullets-card">
+                  <h4>Risk Factors & Shielding Notes:</h4>
+                  <ul class="bullets-list" id="risk-factors">
+                    <li>Run search to view risk profiles.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Right Area: Chatbot Assistant Sidebar -->
+    <aside class="chatbot-sidebar">
+      <div class="glass-card chatbot-card">
+        <div class="chat-header">
+          <i class="fa-solid fa-headset agent-icon"></i>
+          <div>
+            <h3>Aura Agent</h3>
+            <p>Active Financial Assistant</p>
+          </div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="message agent-message">
+            <p>Hello! I have analyzed the financial records and public news for this stock. Ask me anything about the risk level, fundamentals, technical indicators, or sentiment details!</p>
+          </div>
+        </div>
+        <div class="chat-input-wrapper">
+          <input type="text" id="chat-input" placeholder="Ask about this stock..." autocomplete="off">
+          <button id="send-chat-btn"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Overlay Loader -->
+  <div class="loader-overlay hidden" id="loader-overlay">
+    <div class="loader-spinner"></div>
+    <p class="loader-text">Analyzing Ticker Records...</p>
+  </div>
+
+  <!-- Disclaimer Footer -->
+  <footer class="app-footer">
+    <p>Disclaimer: AuraInvest is an academic automated tool. The generated scores, recommendations, and chatbot outputs do not constitute professional financial advice. All investments carry risks.</p>
+  </footer>
+
+  <!-- Frontend Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
